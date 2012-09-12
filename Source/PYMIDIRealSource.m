@@ -103,20 +103,11 @@ static void midiReadProc (const MIDIPacketList* packetList, void* createRefCon, 
 
 - (void)processMIDIPacketList:(const MIDIPacketList*)packetList sender:(id)sender
 {
-    // I'm not sure how expensive creating an auto release pool here is.
-    // I'm hoping it's cheap, meaning it won't add much latency.  It also
-    // means that we can do memory allocation freely in the processing and
-    // it will all get automatically cleaned up once we've passed the data
-    // on, which is a win.
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
-    NSEnumerator* enumerator = [receivers objectEnumerator];
-    id receiver;
-
-    while ((receiver = [[enumerator nextObject] nonretainedObjectValue]))
-        [receiver processMIDIPacketList:packetList sender:self];
-        
-    [pool release];
+    // Don't do any alloc'ing of data in your processMIDIPacketList method, you will run into leaks and NSAutoreleasePools are expensive.
+    // Also, if you plan on doing anything on the UI, you must run it on the main thread.
+    [receivers enumerateObjectsUsingBlock:^(id receiver, BOOL *stop){
+        [[receiver nonretainedObjectValue] processMIDIPacketList:packetList sender:self];
+    } ];
 }
 
 
