@@ -14,8 +14,13 @@
 */
 
 
-#import <PYMIDI/PYMIDIEndpoint.h>
-#import <PYMIDI/PYMIDIVirtualEndpoint.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIEndpoint.h>
+    #import <PYMIDI/PYMIDIVirtualEndpoint.h>
+#else
+    #import "PYMIDIEndpoint.h"
+    #import "PYMIDIVirtualEndpoint.h"
+#endif
 
 
 @interface PYMIDIVirtualDestination : PYMIDIVirtualEndpoint {

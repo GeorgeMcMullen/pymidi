@@ -14,7 +14,13 @@
 */
 
 
-#import <PYMIDI/PYMIDIUtils.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMidiDefines.h>
+#else
+    #import "PYMIDIUtils.h"
+    #import "PYMidiDefines.h"
+#endif
 
 
 NSString*
@@ -240,7 +246,7 @@ Boolean
 PYMIDIIsEndpointLocalVirtual (MIDIEndpointRef midiEndpointRef)
 {
     SInt32 pid;
-    OSStatus error = MIDIObjectGetIntegerProperty (midiEndpointRef, CFSTR("PYMIDIOwnerPID"), &pid);
+    OSStatus error = MIDIObjectGetIntegerProperty (midiEndpointRef, CFSTR(MIDI_PID), &pid);
     return error == noErr && pid == [[NSProcessInfo processInfo] processIdentifier];
 }
 

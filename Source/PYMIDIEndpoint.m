@@ -13,15 +13,21 @@
     $Id: PYMIDIEndpoint.m,v 1.13 2004/01/12 04:24:30 pete Exp $
 */
 
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIEndpoint.h>
 
-#import <PYMIDI/PYMIDIEndpoint.h>
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMIDIEndpointDescriptor.h>
+#else
+    #import "PYMIDIEndpoint.h"
 
-#import <PYMIDI/PYMIDIUtils.h>
-#import <PYMIDI/PYMIDIManager.h>
-#import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import "PYMIDIUtils.h"
+    #import "PYMIDIManager.h"
+    #import "PYMIDIEndpointDescriptor.h"
+#endif
 
-
-@interface PYMIDIEndpoint (private)
+@interface PYMIDIEndpoint (Private)
 
 - (void)setUniqueIDFromMIDIEndpoint;
 - (void)setNameFromMIDIEndpoint;
@@ -168,7 +174,7 @@
                 case kMIDIObjectType_ExternalSource:
                 case kMIDIObjectType_ExternalDestination:
                     // On 10.3 and later we should get here
-                    [names addObject:PYMIDIGetEndpointName (externalDevice)];
+                    [names addObject:PYMIDIGetEndpointName ((MIDIEndpointRef)externalDevice)];
                     break;
                     
                 case kMIDIObjectType_ExternalDevice:

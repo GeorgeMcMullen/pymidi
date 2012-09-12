@@ -14,10 +14,17 @@
 */
 
 
-#import <PYMIDI/PYMIDIEndpointSet.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIEndpointSet.h>
 
-#import <PYMIDI/PYMIDIEndpointDescriptor.h>
-#import <PYMIDI/PYMIDIEndpoint.h>
+    #import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import <PYMIDI/PYMIDIEndpoint.h>
+#else
+    #import "PYMIDIEndpointSet.h"
+
+    #import "PYMIDIEndpointDescriptor.h"
+    #import "PYMIDIEndpoint.h"
+#endif
 
 
 @implementation PYMIDIEndpointSet

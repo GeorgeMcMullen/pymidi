@@ -14,11 +14,21 @@
 */
 
 
-#import <PYMIDI/PYMIDIRealSource.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIRealSource.h>
 
-#import <PYMIDI/PYMIDIUtils.h>
-#import <PYMIDI/PYMIDIManager.h>
-#import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import <PYMIDI/PYMidiDefines.h>
+#else
+    #import "PYMIDIRealSource.h"
+
+    #import "PYMIDIUtils.h"
+    #import "PYMIDIManager.h"
+    #import "PYMIDIEndpointDescriptor.h"
+    #import "PYMidiDefines.h"
+#endif
 
 
 @implementation PYMIDIRealSource
@@ -74,7 +84,7 @@ static void midiReadProc (const MIDIPacketList* packetList, void* createRefCon, 
     if (midiEndpointRef == nil || midiPortRef != nil) return;
 
     MIDIInputPortCreate (
-        [[PYMIDIManager sharedInstance] midiClientRef], CFSTR("PYMIDIRealSource"),
+        [[PYMIDIManager sharedInstance] midiClientRef], CFSTR(MIDI_INPUTPORT),
         midiReadProc, (void*)self, &midiPortRef
     );
     MIDIPortConnectSource (midiPortRef, midiEndpointRef, nil);

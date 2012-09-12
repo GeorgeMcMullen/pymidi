@@ -14,10 +14,19 @@
 */
 
 
-#import <PYMIDI/PYMIDIVirtualDestination.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIVirtualDestination.h>
 
-#import <PYMIDI/PYMIDIUtils.h>
-#import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMidiDefines.h>
+#else
+    #import "PYMIDIVirtualDestination.h"
+
+    #import "PYMIDIUtils.h"
+    #import "PYMIDIManager.h"
+    #import "PYMidiDefines.h"
+#endif
 
 
 @implementation PYMIDIVirtualDestination
@@ -47,7 +56,7 @@ static void midiReadProc (const MIDIPacketList* packetList, void* createRefCon, 
         MIDIObjectSetIntegerProperty (newEndpoint, kMIDIPropertyUniqueID, newUniqueID);
     }
     
-    MIDIObjectSetIntegerProperty (newEndpoint, CFSTR("PYMIDIOwnerPID"), [[NSProcessInfo processInfo] processIdentifier]);
+    MIDIObjectSetIntegerProperty (newEndpoint, CFSTR(MIDI_PID), [[NSProcessInfo processInfo] processIdentifier]);
 
     [manager enableNotifications];
     

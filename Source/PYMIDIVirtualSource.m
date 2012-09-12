@@ -14,10 +14,19 @@
 */
 
 
-#import <PYMIDI/PYMIDIVirtualSource.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIVirtualSource.h>
 
-#import <PYMIDI/PYMIDIUtils.h>
-#import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMidiDefines.h>
+#else
+    #import "PYMIDIVirtualSource.h"
+
+    #import "PYMIDIUtils.h"
+    #import "PYMIDIManager.h"
+    #import "PYMidiDefines.h"
+#endif
 
 
 @implementation PYMIDIVirtualSource
@@ -44,7 +53,7 @@
         MIDIObjectSetIntegerProperty (newEndpoint, kMIDIPropertyUniqueID, newUniqueID);
     }
     
-    MIDIObjectSetIntegerProperty (newEndpoint, CFSTR("PYMIDIOwnerPID"), [[NSProcessInfo processInfo] processIdentifier]);
+    MIDIObjectSetIntegerProperty (newEndpoint, CFSTR(MIDI_PID), [[NSProcessInfo processInfo] processIdentifier]);
     
     [manager enableNotifications];
 

@@ -14,9 +14,13 @@
 */
 
 
-#import <PYMIDI/PYMIDIEndpoint.h>
-#import <PYMIDI/PYMIDIRealEndpoint.h>
-
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIEndpoint.h>
+    #import <PYMIDI/PYMIDIRealEndpoint.h>
+#else
+    #import "PYMIDIEndpoint.h"
+    #import "PYMIDIRealEndpoint.h"
+#endif
 
 @interface PYMIDIRealSource : PYMIDIRealEndpoint {
 }

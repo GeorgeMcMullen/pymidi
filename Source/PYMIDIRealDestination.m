@@ -14,11 +14,21 @@
 */
 
 
-#import <PYMIDI/PYMIDIRealDestination.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIRealDestination.h>
 
-#import <PYMIDI/PYMIDIUtils.h>
-#import <PYMIDI/PYMIDIManager.h>
-#import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import <PYMIDI/PYMidiDefines.h>
+#else
+    #import "PYMIDIRealDestination.h"
+
+    #import "PYMIDIUtils.h"
+    #import "PYMIDIManager.h"
+    #import "PYMIDIEndpointDescriptor.h"
+    #import "PYMidiDefines.h"
+#endif
 
 
 @implementation PYMIDIRealDestination
@@ -70,7 +80,7 @@
     if (midiEndpointRef == nil || midiPortRef != nil) return;
 
     MIDIOutputPortCreate (
-        [[PYMIDIManager sharedInstance] midiClientRef], CFSTR("PYMIDIRealDestination"),
+        [[PYMIDIManager sharedInstance] midiClientRef], CFSTR(MIDI_OUTPUTPORT),
         &midiPortRef
     );
 }

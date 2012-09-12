@@ -22,12 +22,15 @@
 @class PYMIDIEndpoint;
 
 
-@interface PYMIDIManager : NSObject {
+@interface PYMIDIManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate> {
     BOOL			notificationsEnabled;
     MIDIClientRef	midiClientRef;
 
     NSMutableArray*	realSourceArray;
     NSMutableArray* realDestinationArray;
+    NSMutableDictionary* midiNetworkSessionServicesDict;
+
+    NSNetServiceBrowser* midiNetworkBrowser;
 
     NSArray*		noteNamesArray;
 }
@@ -48,13 +51,37 @@
 
 - (NSArray*)realSources;
 - (NSArray*)realSourcesOnlineOrInUse;
+- (PYMIDIEndpoint*)realSourceWithName:(NSString *)name;
 - (PYMIDIEndpoint*)realSourceWithDescriptor:(PYMIDIEndpointDescriptor*)descriptor;
 
 #pragma mark REAL MIDI DESTINATIONS
 
 - (NSArray*)realDestinations;
 - (NSArray*)realDestinationsOnlineOrInUse;
+- (PYMIDIEndpoint*)realDestinationWithName:(NSString *)name;
 - (PYMIDIEndpoint*)realDestinationWithDescriptor:(PYMIDIEndpointDescriptor*)descriptor;
+
+#pragma mark NETWORK ENDPOINTS
+
+- (NSArray*)midiNetworkSessionServices;
+- (NSArray*)midiNetworkSessionConnections;
+- (NSNetService *)midiNetworkSessionServiceWithName:(NSString *)name;
+
+#pragma mark - MIDINetworkSession CONNECTION MANAGEMENT
+
+- (BOOL) midiNetworkSessionEnabled;
+- (void) enableMIDINetworkSession;
+- (void) disableMIDINetworkSession;
+- (BOOL) midiNetworkSessionConnected;
+- (NSString*) describeMIDINetworkSessionConnections;
+- (BOOL) isConnected:(NSNetService*) service;
+- (void) connectToService:(NSNetService*) service;
+- (void) toggleConnected:(NSNetService*) service;
+
+#pragma mark - NSNetServiceBrowserDelegate
+
+- (void)startMIDINetworkBrowser;
+- (void)stopMIDINetworkBrowser;
 
 #pragma mark NOTE NAMES
 

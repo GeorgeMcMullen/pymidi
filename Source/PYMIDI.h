@@ -13,13 +13,24 @@
     $Id: PYMIDI.h,v 1.5 2004/01/10 13:58:10 pete Exp $
 */
 
-
-#import <PYMIDI/PYMIDIUtils.h>
-#import <PYMIDI/PYMIDIManager.h>
-#import <PYMIDI/PYMIDIEndpointDescriptor.h>
-#import <PYMIDI/PYMIDIEndpoint.h>
-#import <PYMIDI/PYMIDIEndpointSet.h>
-#import <PYMIDI/PYMIDIRealSource.h>
-#import <PYMIDI/PYMIDIRealDestination.h>
-#import <PYMIDI/PYMIDIVirtualSource.h>
-#import <PYMIDI/PYMIDIVirtualDestination.h>
+#ifdef PYMIDI_FRAMEWORK
+    #import <PYMIDI/PYMIDIUtils.h>
+    #import <PYMIDI/PYMIDIManager.h>
+    #import <PYMIDI/PYMIDIEndpointDescriptor.h>
+    #import <PYMIDI/PYMIDIEndpoint.h>
+    #import <PYMIDI/PYMIDIEndpointSet.h>
+    #import <PYMIDI/PYMIDIRealSource.h>
+    #import <PYMIDI/PYMIDIRealDestination.h>
+    #import <PYMIDI/PYMIDIVirtualSource.h>
+    #import <PYMIDI/PYMIDIVirtualDestination.h>
+#else
+    #import "PYMIDIUtils.h"
+    #import "PYMIDIManager.h"
+    #import "PYMIDIEndpointDescriptor.h"
+    #import "PYMIDIEndpoint.h"
+    #import "PYMIDIEndpointSet.h"
+    #import "PYMIDIRealSource.h"
+    #import "PYMIDIRealDestination.h"
+    #import "PYMIDIVirtualSource.h"
+    #import "PYMIDIVirtualDestination.h"
+#endif
