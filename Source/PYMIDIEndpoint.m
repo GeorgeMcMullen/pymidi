@@ -357,6 +357,12 @@
 }
 
 
+- (BOOL)isReceiver:(id)receiver
+{
+    return [receivers containsObject:[NSValue valueWithNonretainedObject:receiver]];
+}
+
+
 - (void)removeReceiver:(id)receiver
 {
     [receivers removeObject:[NSValue valueWithNonretainedObject:receiver]];
@@ -368,6 +374,12 @@
 {
     [senders addObject:[NSValue valueWithNonretainedObject:sender]];
     [self startOrStopIO];
+}
+
+
+- (BOOL)isSender:(id)sender
+{
+    return [senders containsObject:[NSValue valueWithNonretainedObject:sender]];
 }
 
 

@@ -76,8 +76,10 @@
 #pragma mark SENDING & RECEIVING
 
 - (void)addReceiver:(id)receiver;
+- (BOOL)isReceiver:(id)receiver;
 - (void)removeReceiver:(id)receiver;
 - (void)addSender:(id)sender;
+- (BOOL)isSender:(id)sender;
 - (void)removeSender:(id)sender;
 // - (void)connectToMIDIController:(AUMIDIControllerRef)controller;
 // - (void)disconnectFromMIDIController:(AUMIDIControllerRef)controller;
