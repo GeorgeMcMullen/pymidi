@@ -68,14 +68,17 @@
 - (NSNetService *)midiNetworkSessionServiceWithName:(NSString *)name;
 
 #pragma mark - MIDINetworkSession CONNECTION MANAGEMENT
-
 - (BOOL) midiNetworkSessionEnabled;
 - (void) enableMIDINetworkSession;
 - (void) disableMIDINetworkSession;
+- (void) enableMIDINetworkSessionIncomingConnections;
+- (void) disableMIDINetworkSessionIncomingConnections;
 - (BOOL) midiNetworkSessionConnected;
 - (NSString*) describeMIDINetworkSessionConnections;
 - (BOOL) isConnected:(NSNetService*) service;
-- (void) connectToService:(NSNetService*) service;
+- (BOOL) connectToServiceManually:(NSNetService*) service;
+- (BOOL) connectToService:(NSNetService*) service;
+- (BOOL) disconnectFromService:(NSNetService*) service;
 - (void) toggleConnected:(NSNetService*) service;
 
 #pragma mark - NSNetServiceBrowserDelegate

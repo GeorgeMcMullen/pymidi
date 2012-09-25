@@ -13,6 +13,8 @@
     $Id: PYMIDIManager.m,v 1.14 2004/01/12 04:39:28 pete Exp $
 */
 
+// TODO: PYMIDI currently only sends one kind of notification with itself as the object. This is too basic and since its run as a singleton, it should be able to send more specific data
+// TODO: Remove all the NSLogs or switch out based on a debug flag
 
 #ifdef PYMIDI_FRAMEWORK
     #import "PYMIDI/PYMIDIManager.h"
@@ -55,7 +57,6 @@
 
 @implementation PYMIDIManager
 
-
 static void midiNotifyProc (const MIDINotification* message, void* refCon);
 
 
@@ -81,15 +82,6 @@ static void midiNotifyProc (const MIDINotification* message, void* refCon);
             return nil;
         }
 
-        [self enableMIDINetworkSession];
-        [self startMIDINetworkBrowser];
-
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(processNetworkMIDINotification:)
-                                                     name:MIDINetworkNotificationSessionDidChange
-                                                   object:[MIDINetworkSession defaultSession]];
-
-
         realSourceArray = [[NSMutableArray alloc] init];
         realDestinationArray = [[NSMutableArray alloc] init];
         midiNetworkSessionServicesDict = [[NSMutableDictionary alloc] init];
@@ -100,6 +92,11 @@ static void midiNotifyProc (const MIDINotification* message, void* refCon);
         [self buildNoteNamesArray];
         
         notificationsEnabled = YES;
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(processNetworkMIDINotification:)
+                                                     name:MIDINetworkNotificationSessionDidChange
+                                                   object:[MIDINetworkSession defaultSession]];
     }
     return self;
 }
@@ -355,6 +352,9 @@ midiNotifyProc (const MIDINotification* message, void* refCon)
 }
 
 #pragma mark MIDI NETWORK CONNECTIONS
+// Network session connections adapted from a variety of sources, including:
+// http://www.onereddog.com.au/2011/04/08/coremidi-networking-setup/
+// http://antifluke.blogspot.com/2011/05/network-midi-on-ios-part-2.html
 
 - (void) processNetworkMIDINotification:(NSNotification*) notification {
     if (notificationsEnabled) {
@@ -394,14 +394,49 @@ midiNotifyProc (const MIDINotification* message, void* refCon)
 - (void) enableMIDINetworkSession
 {
     MIDINetworkSession* session = [MIDINetworkSession defaultSession];
-    session.enabled = YES;
-    session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
+
+    if (session.enabled == NO)
+    {
+        session.enabled = YES;
+    }
+    // session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone; // This should be done separately
 }
 
 - (void) disableMIDINetworkSession
 {
     MIDINetworkSession* session = [MIDINetworkSession defaultSession];
-    session.enabled = NO;
+    if (session.enabled == YES)
+    {
+        session.enabled = NO;
+    }
+    // session.connectionPolicy = MIDINetworkConnectionPolicy_NoOne; // This should be done separately
+
+    // TODO: Check to see if we have to explicitly disconnect from all the connected services
+    [self->midiNetworkSessionServicesDict removeAllObjects];
+}
+
+- (BOOL) midiNetworkSessionIncomingConnectionsEnabled
+{
+    MIDINetworkSession* session = [MIDINetworkSession defaultSession];
+    if (session.connectionPolicy == MIDINetworkConnectionPolicy_NoOne)
+    {
+        return NO;
+    }
+    else
+    {
+        return YES;
+    }
+}
+
+- (void) enableMIDINetworkSessionIncomingConnections
+{
+    MIDINetworkSession* session = [MIDINetworkSession defaultSession];
+    session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
+}
+
+- (void) disableMIDINetworkSessionIncomingConnections
+{
+    MIDINetworkSession* session = [MIDINetworkSession defaultSession];
     session.connectionPolicy = MIDINetworkConnectionPolicy_NoOne;
 }
 
@@ -437,11 +472,50 @@ midiNotifyProc (const MIDINotification* message, void* refCon)
     return NO;
 }
 
-- (void) connectToService:(NSNetService*) service {
+
+// TODO: Figure out what to do if the service does not connect
+- (BOOL) connectToServiceManually:(NSNetService*) service {
+    if ([service hostName]) {
+        // If it's already been resolved we can just add it
+        return [self connectToService:service];
+    }
+    else {
+        // Otherwise resolve it
+        [service setDelegate:self];
+        [service resolveWithTimeout:10.0];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL) connectToService:(NSNetService*) service {
     MIDINetworkHost* host = [MIDINetworkHost hostWithName:[service name] netService:service];
     MIDINetworkConnection* newConnection = [MIDINetworkConnection connectionWithHost:host];
-    [[MIDINetworkSession defaultSession] addConnection:newConnection];
+    BOOL returnCode = [[MIDINetworkSession defaultSession] addConnection:newConnection];
     NSLog(@"Connected to %@", [service name]);
+    return returnCode;
+}
+
+- (BOOL) disconnectFromService:(NSNetService*) service {
+    BOOL returnCode = NO;
+    if ([self isConnected:service]) {
+        for (MIDINetworkConnection* connection in [[MIDINetworkSession defaultSession] connections]) {
+            NSLog(@"Name: %@ net service name: %@ service name: %@", [[connection host] name], [[connection host] netServiceName], [service name]);
+            if ([[connection host] netServiceName] != nil) {
+                if ([[[connection host] netServiceName] isEqualToString:[service name]]) {
+                    returnCode =[[MIDINetworkSession defaultSession] removeConnection:connection];
+                    break;
+                }
+            }
+            else {
+                if ([[[connection host] name]isEqualToString:[service name]]) {
+                    returnCode =[[MIDINetworkSession defaultSession] removeConnection:connection];
+                    break;
+                }
+            }
+        }
+    }
+    return returnCode;
 }
 
 - (void) toggleConnected:(NSNetService*) service {
@@ -480,6 +554,15 @@ midiNotifyProc (const MIDINotification* message, void* refCon)
 
 - (void)startMIDINetworkBrowser
 {
+    if (self->midiNetworkBrowser &&
+        [self->midiNetworkBrowser isKindOfClass:[NSNetServiceBrowser class]] &&
+        (self->midiNetworkBrowser.delegate == self))
+    {
+        return;
+    }
+
+    [self stopMIDINetworkBrowser]; // We must stop it and release it if it is already allocated
+
     self->midiNetworkBrowser = [[NSNetServiceBrowser alloc] init];
     self->midiNetworkBrowser.delegate = self;
     [self->midiNetworkBrowser searchForServicesOfType:MIDINetworkBonjourServiceType /* i.e. @"_apple-midi._udp"*/
@@ -503,12 +586,18 @@ midiNotifyProc (const MIDINotification* message, void* refCon)
     // Filter out local services
     if (![[aService name] isEqualToString:[[UIDevice currentDevice] name]]) {
         [self->midiNetworkSessionServicesDict setValue:aService forKey:[aService name]];
+        if (notificationsEnabled) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"PYMIDISetupChanged" object:self];
+        }
     }
 }
 
 -(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didRemoveService:(NSNetService *)aService moreComing:(BOOL)more {
     NSLog(@"Removing service %@", [aService name]);
     [self->midiNetworkSessionServicesDict removeObjectForKey:[aService name]];
+    if (notificationsEnabled) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"PYMIDISetupChanged" object:self];
+    }
 }
 
 - (void) netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)aNetServiceBrowser {
