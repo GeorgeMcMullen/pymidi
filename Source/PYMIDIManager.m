@@ -96,7 +96,7 @@ static void midiNotifyProc (const MIDINotification* message, void* refCon);
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(processNetworkMIDINotification:)
                                                      name:MIDINetworkNotificationSessionDidChange
-                                                   object:[MIDINetworkSession defaultSession]];
+                                                   object:nil];
     }
     return self;
 }
@@ -104,6 +104,8 @@ static void midiNotifyProc (const MIDINotification* message, void* refCon);
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
     [self stopMIDINetworkBrowser];
     [realSourceArray release];
     [realDestinationArray release];
